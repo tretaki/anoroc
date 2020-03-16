@@ -1,0 +1,5 @@
+wget
+pandas
+numpy
+matplotlib
+argparse

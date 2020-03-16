@@ -1,0 +1,11 @@
+# Environments
+env/
+
+# Editors
+.vscode/
+
+# Data
+cases_data.csv
+
+# cache
+__pycache__/
