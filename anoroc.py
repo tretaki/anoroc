@@ -92,12 +92,12 @@ def extract_country(country, data):
     count = data.loc[data["Country/Region"] == country]
 
     count = count.to_numpy()
-    count = count[:, 4:]  # omitt the first 4 columns
-    count = count.sum(axis=0)  # add all data in subregions
+    count = count[:, 4:]  # omit the first 4 columns
+    count = count.sum(axis=0)  # add all data in sub-regions
 
     # extract dates
     dates = data.columns.to_numpy()
-    dates = dates[4:]  # omitt the first 4 columns
+    dates = dates[4:]  # omit the first 4 columns
 
     return count, dates
 
