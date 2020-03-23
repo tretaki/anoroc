@@ -5,7 +5,9 @@ env/
 .vscode/
 
 # Data
-cases_data.csv
+cases_confirmed.csv
+cases_death.csv
+cases_recovered.csv
 
 # cache
 __pycache__/
