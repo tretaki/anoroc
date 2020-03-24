@@ -6,6 +6,7 @@ import numpy
 import matplotlib.pyplot as plt
 import argparse
 import yaml
+import constants
 
 
 prog_descrip = """Pull csv corona data from github repo. Plot country cases."""
@@ -33,38 +34,32 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-url_confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-
-url_death = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-
-url_recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-
-filename1 = "cases_confirmed.csv"
-filename2 = "cases_death.csv"
-filename3 = "cases_recovered.csv"
-
 # update the csv data if the update flag is passed
 if args.update:
-    if os.path.exists(filename1):
-        os.remove(filename1)
-    if os.path.exists(filename2):
-        os.remove(filename2)
-    if os.path.exists(filename3):
-        os.remove(filename3)
+    if os.path.exists(constants.FILE_CONFIRMED):
+        os.remove(constants.FILE_CONFIRMED)
+    if os.path.exists(constants.FILE_DEATH):
+        os.remove(constants.FILE_DEATH)
+    if os.path.exists(constants.FILE_RECOVERED):
+        os.remove(constants.FILE_RECOVERED)
 
 # download csv if file doesn't exist
-if not os.path.exists(filename1):
+if not os.path.exists(constants.FILE_CONFIRMED):
     print("\n\nDownloading data.")
-    wget.download(url_confirmed, out=filename1)
-if not os.path.exists(filename2):
-    wget.download(url_death, out=filename2)
-if not os.path.exists(filename3):
-    wget.download(url_recovered, out=filename3)
+    wget.download(constants.URL_CONFIRMED, out=constants.FILE_CONFIRMED)
+if not os.path.exists(constants.FILE_DEATH):
+    wget.download(constants.URL_DEATH, out=constants.FILE_DEATH)
+if not os.path.exists(constants.FILE_DEATH):
+    if constants.URL_RECOVERED:
+        wget.download(constants.URL_RECOVERED, out=constants.FILE_RECOVERED)
 
 # load the data
-data_confirmed = pandas.read_csv(filename1)
-data_death = pandas.read_csv(filename2)
-data_recovered = pandas.read_csv(filename3)
+data_confirmed = pandas.read_csv(constants.FILE_CONFIRMED)
+data_death = pandas.read_csv(constants.FILE_DEATH)
+if os.path.exists(constants.FILE_RECOVERED):
+    data_recovered = pandas.read_csv(constants.FILE_RECOVERED)
+else:
+    data_recovered = []
 
 # Get the countries in continents from countries.yaml
 with open("countries.yaml", "r") as file:
@@ -199,9 +194,10 @@ def plot_countries(countries, title=None):
     count_d, dates_d = extract_countries(countries, data_death)
     new_cases_d = count_d - numpy.insert(count_d, 0, 0)[:-1]
 
+    # RECOVERED DATA NOT AVALIBLE ATM
     # count recovered cases
-    count_r, dates_r = extract_countries(countries, data_recovered)
-    new_cases_r = count_r - numpy.insert(count_r, 0, 0)[:-1]
+    # count_r, dates_r = extract_countries(countries, data_recovered)
+    # new_cases_r = count_r - numpy.insert(count_r, 0, 0)[:-1]
 
     if count.any() == 0:
         print("Data set empty. Probably you misspelled country name.")
@@ -213,9 +209,9 @@ def plot_countries(countries, title=None):
 
     plt.xticks(rotation=90)
     label_c = "Confirmed: %s" % count[-1]
-    label_r = "Recovered: %s" % count_r[-1]
+    # label_r = "Recovered: %s" % count_r[-1]
     axs[0].plot(dates, count, "ro-", label=label_c)
-    axs[0].plot(dates, count_r, "go-", label=label_r)
+    # axs[0].plot(dates, count_r, "go-", label=label_r)
     axs[0].set_yscale("log")
     axs[0].legend()
     axs[1].bar(dates, new_cases)
