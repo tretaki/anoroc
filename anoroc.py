@@ -49,17 +49,13 @@ if not os.path.exists(constants.FILE_CONFIRMED):
     wget.download(constants.URL_CONFIRMED, out=constants.FILE_CONFIRMED)
 if not os.path.exists(constants.FILE_DEATH):
     wget.download(constants.URL_DEATH, out=constants.FILE_DEATH)
-if not os.path.exists(constants.FILE_DEATH):
-    if constants.URL_RECOVERED:
-        wget.download(constants.URL_RECOVERED, out=constants.FILE_RECOVERED)
+if not os.path.exists(constants.FILE_RECOVERED):
+    wget.download(constants.URL_RECOVERED, out=constants.FILE_RECOVERED)
 
 # load the data
 data_confirmed = pandas.read_csv(constants.FILE_CONFIRMED)
 data_death = pandas.read_csv(constants.FILE_DEATH)
-if os.path.exists(constants.FILE_RECOVERED):
-    data_recovered = pandas.read_csv(constants.FILE_RECOVERED)
-else:
-    data_recovered = []
+data_recovered = pandas.read_csv(constants.FILE_RECOVERED)
 
 # Get the countries in continents from countries.yaml
 with open("countries.yaml", "r") as file:
@@ -194,10 +190,9 @@ def plot_countries(countries, title=None):
     count_d, dates_d = extract_countries(countries, data_death)
     new_cases_d = count_d - numpy.insert(count_d, 0, 0)[:-1]
 
-    # RECOVERED DATA NOT AVALIBLE ATM
     # count recovered cases
-    # count_r, dates_r = extract_countries(countries, data_recovered)
-    # new_cases_r = count_r - numpy.insert(count_r, 0, 0)[:-1]
+    count_r, dates_r = extract_countries(countries, data_recovered)
+    new_cases_r = count_r - numpy.insert(count_r, 0, 0)[:-1]
 
     if count.any() == 0:
         print("Data set empty. Probably you misspelled country name.")
@@ -209,9 +204,9 @@ def plot_countries(countries, title=None):
 
     plt.xticks(rotation=90)
     label_c = "Confirmed: %s" % count[-1]
-    # label_r = "Recovered: %s" % count_r[-1]
+    label_r = "Recovered: %s" % count_r[-1]
     axs[0].plot(dates, count, "ro-", label=label_c)
-    # axs[0].plot(dates, count_r, "go-", label=label_r)
+    axs[0].plot(dates, count_r, "go-", label=label_r)
     axs[0].set_yscale("log")
     axs[0].legend()
     axs[1].bar(dates, new_cases)
@@ -221,7 +216,12 @@ def plot_countries(countries, title=None):
     axs[0].set_ylabel("Cumulative Cases\n Logscale", color="r")
     axs[1].set_ylabel("New Cases", color="b")
     axs[2].set_ylabel("Cumulative Deaths", color="r")
-    axs[2].annotate("Deaths: %s" % count_d[-1], xy=(1, count_d[-1] * 0.75))
+
+    death_rate = count_d[-1] / count[-1] * 100.0
+    death_rate = "%3.1f" % death_rate
+    label_d = "Deaths: %s\nDeath Rate: %s" % (count_d[-1], death_rate)
+    axs[2].annotate(label_d, xy=(1, count_d[-1] * 0.65))
+
     axs[3].set_ylabel("New Deaths", color="b")
     plt.show()
 

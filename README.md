@@ -34,5 +34,4 @@ If you want to re-download and update the data use -u flag.
 ## TODOs
 
 + Add tests.
-+ Add recovered data.
 + Improve plot functions to be able to plot multiple countries at same time.
