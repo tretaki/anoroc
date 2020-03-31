@@ -169,8 +169,8 @@ def countries(countries, title=None, debug=False):
         days=[format], months=[format], years=[format],
     )
 
-    t2.line(dates, count, line_width=3, color="black", alpha=0.7)
-    t2.circle(dates, count, size=7, color="black", fill_color="white")
+    t2.line(dates, count_d, line_width=3, color="black", alpha=0.7)
+    t2.circle(dates, count_d, size=7, color="black", fill_color="white")
 
     tab2 = Panel(child=t2, title="Log")
 
