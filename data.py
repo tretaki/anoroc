@@ -1,8 +1,13 @@
 """ Exract data from csv files """
 import pandas
-import constants
 
-# load the data
-confirmed = pandas.read_csv(constants.FILE_CONFIRMED)
-death = pandas.read_csv(constants.FILE_DEATH)
-recovered = pandas.read_csv(constants.FILE_RECOVERED)
+confirmed, death, recovered = None, None, None
+
+
+def load(file_confirmed, file_death, file_recovered):
+    # load the data
+    confirmed = pandas.read_csv(file_confirmed)
+    death = pandas.read_csv(file_death)
+    recovered = pandas.read_csv(file_death)
+
+    return confirmed, death, recovered
