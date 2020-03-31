@@ -6,3 +6,4 @@ URL_RECOVERED = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/maste
 FILE_CONFIRMED = "cases_confirmed.csv"
 FILE_DEATH = "cases_death.csv"
 FILE_RECOVERED = "cases_recovered.csv"
+FILE_BOKEH = "bokeh.html"

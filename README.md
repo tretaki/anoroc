@@ -2,7 +2,7 @@
 
 Get the corona csv data from: https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series
 
-Download and plot confirmed cases and deaths data.
+Download and plot confirmed, recovered cases and deaths data.
 
 ## Usage
 
@@ -31,7 +31,10 @@ If you want to re-download and update the data use -u flag.
 
 `python anoroc.py -u -c Italy`
 
+The output is the bokeh.html file, which you can open in a browser.
+
 ## TODOs
 
 + Add tests.
 + Improve plot functions to be able to plot multiple countries at same time.
++ Clean up bokeh plotting code.

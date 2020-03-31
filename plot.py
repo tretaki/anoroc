@@ -1,12 +1,20 @@
 """ plotting fuctions for anoroc """
 import numpy
-import matplotlib.pyplot as plt
+import pandas
 import extract
 import data
+import constants
+from bokeh.io import output_file, save
+from bokeh.models import Panel, Tabs, DatetimeTickFormatter, Div, HoverTool
+from bokeh.layouts import gridplot, column
+from bokeh.plotting import figure
+
+WIDTH = 700
+HEIGHT = 300
 
 
 def countries(countries, title=None, debug=False):
-    """ Plot data with matplotlib.
+    """ Plot data with Bokeh.
 
         Make four graphs: logscale cumulative cases, new cases,
         cumulative deaths, new deaths
@@ -15,6 +23,7 @@ def countries(countries, title=None, debug=False):
     # count confirmed cases
     count, dates = extract.get_countries(countries, data.confirmed)
     new_cases = count - numpy.insert(count, 0, 0)[:-1]
+    dates = pandas.to_datetime(dates)
 
     # count death cases
     count_d, dates_d = extract.get_countries(countries, data.death)
@@ -28,33 +37,160 @@ def countries(countries, title=None, debug=False):
         print("Data set empty. Probably you misspelled country name.")
         return
 
-    fig, axs = plt.subplots(4, sharex=True)
+    # date format of x-axis
+    format = "%b %d"
 
-    axs[0].set_title(title)
+    TOOLTIPS = [
+        ("Count", "$y{i}"),
+    ]
 
-    plt.xticks(rotation=90)
-    label_c = "Confirmed: %s" % count[-1]
-    label_r = "Recovered: %s" % count_r[-1]
-    axs[0].plot(dates, count, "ro-", label=label_c)
-    axs[0].plot(dates, count_r, "go-", label=label_r)
-    axs[0].set_yscale("log")
-    axs[0].legend()
-    axs[1].bar(dates, new_cases)
-    axs[2].plot(dates_d, count_d, "ro-")
-    axs[3].bar(dates_d, new_cases_d)
+    plot_options = dict(
+        width=WIDTH,
+        plot_height=HEIGHT,
+        # tools="pan,wheel_zoom,hover",
+        x_axis_type="datetime",
+        # toolbar_location="below",
+    )
 
-    axs[0].set_ylabel("Cumulative Cases\n Logscale", color="r")
-    axs[1].set_ylabel("New Cases", color="b")
-    axs[2].set_ylabel("Cumulative Deaths", color="r")
+    t1 = figure(
+        x_axis_label="Date",
+        y_axis_label="Cumulative Cases",
+        tooltips=TOOLTIPS,
+        **plot_options,
+    )
 
-    death_rate = count_d[-1] / count[-1] * 100.0
-    death_rate = "%3.1f" % death_rate
-    label_d = "Deaths: %s\nDeath Rate: %s" % (count_d[-1], death_rate)
-    axs[2].annotate(label_d, xy=(1, count_d[-1] * 0.65))
+    t1.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
 
-    axs[3].set_ylabel("New Deaths", color="b")
+    t1.line(dates, count, line_width=3, color="red", alpha=0.7)
+    t1.circle(
+        dates, count, size=7, color="red", fill_color="white", legend_label="Cases"
+    )
+    t1.line(dates, count_r, line_width=3, color="green", alpha=0.7)
+    t1.circle(
+        dates,
+        count_r,
+        size=7,
+        color="green",
+        fill_color="white",
+        legend_label="Recovered",
+    )
 
-    if not debug:
-        plt.show()
-    else:
-        return death_rate
+    t1.legend.location = "top_left"
+    tab1 = Panel(child=t1, title="Linear")
+
+    t2 = figure(
+        x_axis_label="Date",
+        y_axis_label="Cumulative Cases",
+        y_axis_type="log",
+        tooltips=TOOLTIPS,
+        **plot_options,
+    )
+
+    t2.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    t2.line(dates, count, line_width=3, color="red", alpha=0.7)
+    t2.circle(
+        dates, count, size=7, color="red", fill_color="white", legend_label="Cases"
+    )
+    t2.line(dates, count_r, line_width=3, color="green", alpha=0.7)
+    t2.circle(
+        dates,
+        count_r,
+        size=7,
+        color="green",
+        fill_color="white",
+        legend_label="Recovered",
+    )
+
+    t2.legend.location = "top_left"
+
+    tab2 = Panel(child=t2, title="Log")
+
+    p1 = Tabs(tabs=[tab1, tab2])
+
+    p2 = figure(x_axis_label="Date", y_axis_label="New Cases", **plot_options)
+
+    p2.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    p2.vbar(
+        x=dates,
+        top=new_cases,
+        bottom=0,
+        width=50000000,
+        color="red",
+        alpha=0.9,
+        legend_label="Cases",
+    )
+    p2.vbar(
+        x=dates,
+        top=new_cases_r,
+        bottom=0,
+        width=50000000,
+        color="green",
+        alpha=0.7,
+        legend_label="Recovered",
+    )
+
+    p2.legend.location = "top_left"
+
+    t1 = figure(
+        x_axis_label="Date",
+        y_axis_label="Cumulative Deaths",
+        tooltips=TOOLTIPS,
+        **plot_options,
+    )
+
+    t1.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    t1.line(dates, count_d, line_width=3, color="black", alpha=0.7)
+    t1.circle(
+        dates, count_d, size=7, color="black", fill_color="white",
+    )
+
+    tab1 = Panel(child=t1, title="Linear")
+
+    t2 = figure(
+        x_axis_label="Date",
+        y_axis_label="Comulative Deaths",
+        y_axis_type="log",
+        tooltips=TOOLTIPS,
+        **plot_options,
+    )
+
+    t2.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    t2.line(dates, count, line_width=3, color="black", alpha=0.7)
+    t2.circle(dates, count, size=7, color="black", fill_color="white")
+
+    tab2 = Panel(child=t2, title="Log")
+
+    p3 = Tabs(tabs=[tab1, tab2])
+
+    p4 = figure(x_axis_label="Date", y_axis_label="New Deaths", **plot_options)
+
+    p4.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    p4.vbar(
+        x=dates, top=new_cases_d, bottom=0, width=50000000, color="black", alpha=0.5
+    )
+
+    # make a grid
+    grid = gridplot([[p1, p3], [p2, p4]], toolbar_location="below")
+
+    output_file(constants.FILE_BOKEH)
+
+    title = "<h2>" + title + "</h2>"
+    title = Div(text=title)
+    save(column(title, grid))

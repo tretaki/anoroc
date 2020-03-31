@@ -51,6 +51,11 @@ if not os.path.exists(constants.FILE_DEATH):
 if not os.path.exists(constants.FILE_RECOVERED):
     wget.download(constants.URL_RECOVERED, out=constants.FILE_RECOVERED)
 
+# load the data from csv files
+data.confirmed, data.death, data.recovered = data.load(
+    constants.FILE_CONFIRMED, constants.FILE_DEATH, constants.FILE_RECOVERED
+)
+
 
 if __name__ == "__main__":
 

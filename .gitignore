@@ -14,3 +14,6 @@ __pycache__/
 
 # 
 ideas.md
+
+# bokeh output
+bokeh.html
