@@ -5,19 +5,146 @@ import extract
 import data
 import constants
 from bokeh.io import output_file, save
-from bokeh.models import Panel, Tabs, DatetimeTickFormatter, Div, HoverTool
-from bokeh.layouts import gridplot, column
+from bokeh.models import (
+    Panel,
+    Tabs,
+    DatetimeTickFormatter,
+    Div,
+    HoverTool,
+    Label,
+    Select,
+    CustomJS,
+)
+from bokeh.layouts import gridplot, column, row
 from bokeh.plotting import figure
+from bokeh.embed import components
 
 WIDTH = 700
-HEIGHT = 300
+HEIGHT = 350
+
+
+def bokeh_select_scale(figs, title="Change Scale"):
+    names = [fig.name for fig in figs]
+    drop = Select(title=title, value=names[0], options=names, width=100)
+    # toggle = Toggle(label="Scale", button_type="success")
+    for fig in figs[1:]:
+        fig.visible = False
+
+    callback = CustomJS(
+        args=dict(figs=figs),
+        code="""
+        let selected = cb_obj.value;
+        for(let fig of figs){
+            fig.visible = fig.name == selected;
+        }
+    """,
+    )
+
+    drop.js_on_change("value", callback)
+
+    return [drop] + figs
+
+
+def boheh_add_line(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
+    """ Adds dataset as line points to the bokeh figure.
+    """
+
+    # constants
+    line_width = 3
+    point_size = 7
+    legend_location = "top_left"
+
+    # add line
+    figure.line(xdata, ydata, line_width=line_width, color=color, alpha=alpha)
+
+    # add points
+    properties = dict(size=point_size, color=color, fill_color="white")
+    if legend:
+        properties["legend_label"] = legend
+
+    figure.circle(xdata, ydata, **properties)
+
+    if legend:
+        figure.legend.location = legend_location
+
+
+def boheh_add_vbars(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
+    """ Adds dataset as vertical bars to the bokeh figure.
+    """
+
+    # constants
+    bar_width = 50000000
+    legend_location = "top_left"
+
+    # add line
+    properties = dict(width=bar_width, color=color, alpha=alpha)
+    if legend:
+        properties["legend_label"] = legend
+    figure.vbar(x=xdata, top=ydata, bottom=0, **properties)
+
+    if legend:
+        figure.legend.location = legend_location
+
+
+def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False, name=None):
+    """ Make a bokeh empty canvas with defined properties.
+    """
+
+    # constants
+    # date format of x-axis
+    format = "%b %d"
+
+    if hover:
+        TOOLTIPS = [
+            ("Count", "$y{i}"),
+        ]
+    else:
+        TOOLTIPS = None
+
+    plot_options = dict(
+        width=WIDTH,
+        plot_height=HEIGHT,
+        x_axis_type="datetime",
+        active_drag=None,
+        sizing_mode="scale_width",
+    )
+
+    # set to log y-axis if needed
+    if logscale:
+        plot_options["y_axis_type"] = "log"
+
+    # set name if needed
+    if name:
+        plot_options["name"] = name
+
+    plot = figure(
+        x_axis_label=xlabel, y_axis_label=ylabel, tooltips=TOOLTIPS, **plot_options,
+    )
+
+    plot.xaxis.formatter = DatetimeTickFormatter(
+        days=[format], months=[format], years=[format],
+    )
+
+    return plot
+
+
+def bokeh_lin_log_tabs(tab1, tab2):
+    """ Create linar and logarithmic tabs from two plots.
+    """
+
+    tab1 = Panel(child=tab1, title="Linear")
+    tab2 = Panel(child=tab2, title="Logarithmic")
+
+    return Tabs(tabs=[tab1, tab2])
 
 
 def countries(countries, title=None, debug=False):
     """ Plot data with Bokeh.
 
         Make four graphs: logscale cumulative cases, new cases,
-        cumulative deaths, new deaths
+        cumulative deaths, new deaths. Save bokeh output into html file.
+
+        return: bokeh plots as a column
     """
 
     # count confirmed cases
@@ -25,172 +152,96 @@ def countries(countries, title=None, debug=False):
     new_cases = count - numpy.insert(count, 0, 0)[:-1]
     dates = pandas.to_datetime(dates)
 
-    # count death cases
-    count_d, dates_d = extract.get_countries(countries, data.death)
-    new_cases_d = count_d - numpy.insert(count_d, 0, 0)[:-1]
-
     # count recovered cases
     count_r, dates_r = extract.get_countries(countries, data.recovered)
     new_cases_r = count_r - numpy.insert(count_r, 0, 0)[:-1]
+    dates = pandas.to_datetime(dates_r)
+
+    # count death cases
+    count_d, dates_d = extract.get_countries(countries, data.death)
+    new_cases_d = count_d - numpy.insert(count_d, 0, 0)[:-1]
+    dates = pandas.to_datetime(dates_d)
 
     if count.any() == 0:
         print("Data set empty. Probably you misspelled country name.")
         return
 
-    # date format of x-axis
-    format = "%b %d"
+    # calculate death rate
+    death_rate = count_d[-1] / count[-1] * 100.0
 
-    TOOLTIPS = [
-        ("Count", "$y{i}"),
-    ]
-
-    plot_options = dict(
-        width=WIDTH,
-        plot_height=HEIGHT,
-        # tools="pan,wheel_zoom,hover",
-        x_axis_type="datetime",
-        # toolbar_location="below",
+    # make death rate label
+    death_rate_label = Label(
+        x=10,
+        y=HEIGHT * 0.75,
+        x_units="screen",
+        y_units="screen",
+        text="Death Rate: %3.1f" % death_rate,
+        text_font_size="10pt",
+        background_fill_color="white",
+        background_fill_alpha=1.0,
     )
 
-    t1 = figure(
-        x_axis_label="Date",
-        y_axis_label="Cumulative Cases",
-        tooltips=TOOLTIPS,
-        **plot_options,
+    # create linear tab for cases
+    tab1 = bokeh_canvas("Date", "Cumulative Cases", hover=True, name="Lin")
+    boheh_add_line(tab1, dates, count, legend="Confirmed", color="red")
+    boheh_add_line(tab1, dates, count_r, legend="Recovered", color="green")
+    boheh_add_line(tab1, dates, count_d, legend="Died", color="black")
+
+    # create log tab for cases
+    tab2 = bokeh_canvas(
+        "Date", "Cumulative Cases", logscale=True, hover=True, name="Log"
     )
+    boheh_add_line(tab2, dates, count, legend="Confirmed", color="red")
+    boheh_add_line(tab2, dates, count_r, legend="Recovered", color="green")
+    boheh_add_line(tab2, dates, count_d, legend="Died", color="black")
 
-    t1.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
+    # make tabs cases
+    plot1 = bokeh_lin_log_tabs(tab1, tab2)
+    # plot1 = column(bokeh_select_scale([tab1, tab2]))
 
-    t1.line(dates, count, line_width=3, color="red", alpha=0.7)
-    t1.circle(
-        dates, count, size=7, color="red", fill_color="white", legend_label="Cases"
-    )
-    t1.line(dates, count_r, line_width=3, color="green", alpha=0.7)
-    t1.circle(
-        dates,
-        count_r,
-        size=7,
-        color="green",
-        fill_color="white",
-        legend_label="Recovered",
-    )
+    # make new cases plot
+    plot2 = bokeh_canvas("Date", "New Cases")
+    boheh_add_vbars(plot2, dates, new_cases, legend="Confirmed", color="red")
+    boheh_add_vbars(plot2, dates, new_cases_r, legend="Recovered", color="green")
+    boheh_add_vbars(plot2, dates, new_cases_d, legend="Died", color="black")
 
-    t1.legend.location = "top_left"
-    tab1 = Panel(child=t1, title="Linear")
+    # create linear tab for deaths
+    tab1 = bokeh_canvas("Date", "Cumulative Deaths", hover=True)
+    boheh_add_line(tab1, dates, count_d, color="black")
 
-    t2 = figure(
-        x_axis_label="Date",
-        y_axis_label="Cumulative Cases",
-        y_axis_type="log",
-        tooltips=TOOLTIPS,
-        **plot_options,
-    )
+    # create log tab for cases
+    tab2 = bokeh_canvas("Date", "Cumulative Deaths", logscale=True, hover=True)
+    boheh_add_line(tab2, dates, count_d, color="black")
 
-    t2.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
+    # add death label
+    tab1.add_layout(death_rate_label)
+    tab2.add_layout(death_rate_label)
 
-    t2.line(dates, count, line_width=3, color="red", alpha=0.7)
-    t2.circle(
-        dates, count, size=7, color="red", fill_color="white", legend_label="Cases"
-    )
-    t2.line(dates, count_r, line_width=3, color="green", alpha=0.7)
-    t2.circle(
-        dates,
-        count_r,
-        size=7,
-        color="green",
-        fill_color="white",
-        legend_label="Recovered",
-    )
+    # make tabs deaths
+    plot3 = bokeh_lin_log_tabs(tab1, tab2)
 
-    t2.legend.location = "top_left"
+    # make new cases plot
+    plot4 = bokeh_canvas("Date", "New Deaths")
+    boheh_add_vbars(plot4, dates, new_cases_d, color="black")
 
-    tab2 = Panel(child=t2, title="Log")
+    # put plots into a column
+    plots = column(plot1, plot2, plot3, plot4, sizing_mode="scale_width")
+    # plots = column(plot1, plot2, sizing_mode="scale_width")
 
-    p1 = Tabs(tabs=[tab1, tab2])
-
-    p2 = figure(x_axis_label="Date", y_axis_label="New Cases", **plot_options)
-
-    p2.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
-
-    p2.vbar(
-        x=dates,
-        top=new_cases,
-        bottom=0,
-        width=50000000,
-        color="red",
-        alpha=0.9,
-        legend_label="Cases",
-    )
-    p2.vbar(
-        x=dates,
-        top=new_cases_r,
-        bottom=0,
-        width=50000000,
-        color="green",
-        alpha=0.7,
-        legend_label="Recovered",
-    )
-
-    p2.legend.location = "top_left"
-
-    t1 = figure(
-        x_axis_label="Date",
-        y_axis_label="Cumulative Deaths",
-        tooltips=TOOLTIPS,
-        **plot_options,
-    )
-
-    t1.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
-
-    t1.line(dates, count_d, line_width=3, color="black", alpha=0.7)
-    t1.circle(
-        dates, count_d, size=7, color="black", fill_color="white",
-    )
-
-    tab1 = Panel(child=t1, title="Linear")
-
-    t2 = figure(
-        x_axis_label="Date",
-        y_axis_label="Comulative Deaths",
-        y_axis_type="log",
-        tooltips=TOOLTIPS,
-        **plot_options,
-    )
-
-    t2.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
-
-    t2.line(dates, count_d, line_width=3, color="black", alpha=0.7)
-    t2.circle(dates, count_d, size=7, color="black", fill_color="white")
-
-    tab2 = Panel(child=t2, title="Log")
-
-    p3 = Tabs(tabs=[tab1, tab2])
-
-    p4 = figure(x_axis_label="Date", y_axis_label="New Deaths", **plot_options)
-
-    p4.xaxis.formatter = DatetimeTickFormatter(
-        days=[format], months=[format], years=[format],
-    )
-
-    p4.vbar(
-        x=dates, top=new_cases_d, bottom=0, width=50000000, color="black", alpha=0.5
-    )
-
-    # make a grid
-    grid = gridplot([[p1, p3], [p2, p4]], toolbar_location="below")
-
-    output_file(constants.FILE_BOKEH)
-
+    # title for html file
     title = "<h2>" + title + "</h2>"
     title = Div(text=title)
-    save(column(title, grid))
+
+    # save output to html file
+    output_file(constants.FILE_BOKEH)
+    save(column(title, plots))
+
+    return plots
+
+
+def embed(figures):
+    script, div = components(figures)
+
+    with open(constants.FILE_BOKEH_EMBED, "w") as f:
+        f.write(div)
+        f.write(script)

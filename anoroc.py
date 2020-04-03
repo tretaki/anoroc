@@ -59,29 +59,35 @@ data.confirmed, data.death, data.recovered = data.load(
 
 if __name__ == "__main__":
 
+    figure = None
+
     if args.country:
         country = args.country
-        plot.countries([str(country)], title=country)
+        figure = plot.countries([str(country)], title=country)
     elif args.region and args.exclude:
         region_name = args.region
         region, excluded = region.get(
             region_name, region.countries, data.confirmed, exclude=[str(args.exclude)]
         )
         if region and excluded:
-            plot.countries(region, title=region_name + " excluding " + args.exclude)
+            figure = plot.countries(
+                region, title=region_name + " excluding " + args.exclude
+            )
         elif region:
             print(args.exclude + " not in " + args.region)
             print("Plotting data for the whole region.")
-            plot.countries(region, title=region_name)
+            figure = plot.countries(region, title=region_name)
     elif args.region:
         region_name = args.region
         region, _ = region.get(region_name, region.countries, data.confirmed)
         if region:
-            plot.countries(region, title=region_name)
+            figure = plot.countries(region, title=region_name)
     elif args.update:
         print("\n\nFresh data downloaded.")
     else:
         print("\nNo country selected. Plotting data for whole world.")
         world, _ = region.get("World", region.countries, data.confirmed)
         if world:
-            plot.countries(world, title="World")
+            figure = plot.countries(world, title="World")
+    if figure:
+        plot.embed(figure)
