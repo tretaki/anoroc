@@ -6,6 +6,7 @@ import constants
 import plot
 import data
 import region
+import bokeh
 
 
 prog_descrip = """Pull csv corona data from github repo. Plot country cases."""
@@ -63,31 +64,36 @@ if __name__ == "__main__":
 
     if args.country:
         country = args.country
-        figure = plot.countries([str(country)], title=country)
+        figure = plot.plot_countries([str(country)], title=country)
     elif args.region and args.exclude:
         region_name = args.region
         region, excluded = region.get(
             region_name, region.countries, data.confirmed, exclude=[str(args.exclude)]
         )
         if region and excluded:
-            figure = plot.countries(
+            figure = plot.make_all_plots_region(
                 region, title=region_name + " excluding " + args.exclude
             )
         elif region:
             print(args.exclude + " not in " + args.region)
             print("Plotting data for the whole region.")
-            figure = plot.countries(region, title=region_name)
+            figure = plot.make_all_plots_region(region, title=region_name)
     elif args.region:
         region_name = args.region
         region, _ = region.get(region_name, region.countries, data.confirmed)
         if region:
-            figure = plot.countries(region, title=region_name)
+            figure = plot.make_all_plots_region(region, title=region_name)
     elif args.update:
         print("\n\nFresh data downloaded.")
     else:
         print("\nNo country selected. Plotting data for whole world.")
         world, _ = region.get("World", region.countries, data.confirmed)
         if world:
-            figure = plot.countries(world, title="World")
+            figure = plot.make_all_plots_region(world, title="World", number=6)
+
     if figure:
         plot.embed(figure)
+
+        # save output to html file
+        bokeh.io.output_file(constants.FILE_BOKEH)
+        bokeh.io.save(figure)

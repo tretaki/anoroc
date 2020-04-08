@@ -3,6 +3,7 @@ import numpy
 import pandas
 import extract
 import data
+import region
 import constants
 from bokeh.io import output_file, save
 from bokeh.models import (
@@ -12,40 +13,65 @@ from bokeh.models import (
     Div,
     HoverTool,
     Label,
+    ColumnDataSource,
     Select,
     CustomJS,
 )
-from bokeh.layouts import gridplot, column, row
+from bokeh.layouts import column, row
 from bokeh.plotting import figure
 from bokeh.embed import components
+from bokeh.palettes import brewer
 
 WIDTH = 700
 HEIGHT = 350
 
 
-def bokeh_select_scale(figs, title="Change Scale"):
-    names = [fig.name for fig in figs]
-    drop = Select(title=title, value=names[0], options=names, width=100)
-    # toggle = Toggle(label="Scale", button_type="success")
-    for fig in figs[1:]:
-        fig.visible = False
+def bokeh_vstack_region(
+    figure, max, xdata, count_all, data_all, color="black", alpha=0.5
+):
 
-    callback = CustomJS(
-        args=dict(figs=figs),
-        code="""
-        let selected = cb_obj.value;
-        for(let fig of figs){
-            fig.visible = fig.name == selected;
-        }
-    """,
+    """ Creates a vstack plot on a bokeh canvas.
+    """
+
+    # data for producing vstack plot
+    data_vstack = {}
+    data_vstack["Dates"] = xdata
+
+    # rest of countries
+    rest = count_all
+
+    # create data sources
+    for country in max:
+        count_country, dates = extract.get_countries([country], data_all)
+        data_vstack[country] = count_country
+
+        # subtract country data form the rest
+        rest -= count_country
+
+    data_vstack["Others"] = rest
+
+    stacks = max
+    stacks.append("Others")
+
+    figure.varea_stack(
+        stackers=stacks,
+        x="Dates",
+        color=brewer["Spectral"][len(stacks)],
+        legend_label=stacks,
+        source=data_vstack,
     )
 
-    drop.js_on_change("value", callback)
+    figure.vline_stack(
+        stackers=stacks, x="Dates", source=data_vstack, color=color, alpha=alpha
+    )
 
-    return [drop] + figs
+    figure.legend.items.reverse()
+    figure.legend.location = "top_left"
 
 
-def boheh_add_line(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
+def boheh_add_line(
+    figure, xdata, ydata, name="Count", legend=True, color="red", alpha=0.7
+):
     """ Adds dataset as line points to the bokeh figure.
     """
 
@@ -54,21 +80,34 @@ def boheh_add_line(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
     point_size = 7
     legend_location = "top_left"
 
+    data = {"Dates": xdata, name: ydata}
+    source = ColumnDataSource(data)
+
     # add line
-    figure.line(xdata, ydata, line_width=line_width, color=color, alpha=alpha)
+    figure.line(
+        "Dates",
+        name,
+        source=source,
+        line_width=line_width,
+        color=color,
+        alpha=alpha,
+        name=name,
+    )
 
     # add points
-    properties = dict(size=point_size, color=color, fill_color="white")
+    properties = dict(size=point_size, color=color, fill_color="white", name=name)
     if legend:
-        properties["legend_label"] = legend
+        properties["legend_label"] = name
 
-    figure.circle(xdata, ydata, **properties)
+    figure.circle("Dates", name, source=source, **properties)
 
     if legend:
         figure.legend.location = legend_location
 
 
-def boheh_add_vbars(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
+def boheh_add_vbars(
+    figure, xdata, ydata, name="Count", legend=True, color="red", alpha=0.7
+):
     """ Adds dataset as vertical bars to the bokeh figure.
     """
 
@@ -76,28 +115,34 @@ def boheh_add_vbars(figure, xdata, ydata, legend=None, color="red", alpha=0.7):
     bar_width = 50000000
     legend_location = "top_left"
 
-    # add line
-    properties = dict(width=bar_width, color=color, alpha=alpha)
+    # data
+    data = {"Dates": xdata, name: ydata}
+    source = ColumnDataSource(data)
+
+    # add bars
+    properties = dict(
+        width=bar_width, color=color, alpha=alpha, name=name, source=source
+    )
     if legend:
-        properties["legend_label"] = legend
-    figure.vbar(x=xdata, top=ydata, bottom=0, **properties)
+        properties["legend_label"] = name
+    figure.vbar(x="Dates", top=name, bottom=0, **properties)
 
     if legend:
         figure.legend.location = legend_location
 
 
-def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False, name=None):
+def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False):
     """ Make a bokeh empty canvas with defined properties.
     """
 
     # constants
+
     # date format of x-axis
     format = "%b %d"
 
+    # add hover
     if hover:
-        TOOLTIPS = [
-            ("Count", "$y{i}"),
-        ]
+        TOOLTIPS = "$name: @$name"
     else:
         TOOLTIPS = None
 
@@ -112,10 +157,6 @@ def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False, name=None):
     # set to log y-axis if needed
     if logscale:
         plot_options["y_axis_type"] = "log"
-
-    # set name if needed
-    if name:
-        plot_options["name"] = name
 
     plot = figure(
         x_axis_label=xlabel, y_axis_label=ylabel, tooltips=TOOLTIPS, **plot_options,
@@ -138,13 +179,22 @@ def bokeh_lin_log_tabs(tab1, tab2):
     return Tabs(tabs=[tab1, tab2])
 
 
-def countries(countries, title=None, debug=False):
-    """ Plot data with Bokeh.
+def plot_countries(countries, title=None):
+    """ Plot countries data with Bokeh.
 
         Make four graphs: logscale cumulative cases, new cases,
         cumulative deaths, new deaths. Save bokeh output into html file.
 
-        return: bokeh plots as a column
+        Paremeters
+        ----------
+        countries: list
+            List of country names.
+        title: string
+            Title of the plot.
+        
+        Returns
+        -------
+        plots: bokeh plots as a column
     """
 
     # count confirmed cases
@@ -182,36 +232,33 @@ def countries(countries, title=None, debug=False):
     )
 
     # create linear tab for cases
-    tab1 = bokeh_canvas("Date", "Cumulative Cases", hover=True, name="Lin")
-    boheh_add_line(tab1, dates, count, legend="Confirmed", color="red")
-    boheh_add_line(tab1, dates, count_r, legend="Recovered", color="green")
-    boheh_add_line(tab1, dates, count_d, legend="Died", color="black")
+    tab1 = bokeh_canvas(None, "Cumulative Cases", hover=True)
+    boheh_add_line(tab1, dates, count, name="Confirmed", color="red")
+    boheh_add_line(tab1, dates, count_r, name="Recovered", color="green")
+    boheh_add_line(tab1, dates, count_d, name="Died", color="black")
 
     # create log tab for cases
-    tab2 = bokeh_canvas(
-        "Date", "Cumulative Cases", logscale=True, hover=True, name="Log"
-    )
-    boheh_add_line(tab2, dates, count, legend="Confirmed", color="red")
-    boheh_add_line(tab2, dates, count_r, legend="Recovered", color="green")
-    boheh_add_line(tab2, dates, count_d, legend="Died", color="black")
+    tab2 = bokeh_canvas(None, "Cumulative Cases", logscale=True, hover=True)
+    boheh_add_line(tab2, dates, count, name="Confirmed", color="red")
+    boheh_add_line(tab2, dates, count_r, name="Recovered", color="green")
+    boheh_add_line(tab2, dates, count_d, name="Died", color="black")
 
     # make tabs cases
     plot1 = bokeh_lin_log_tabs(tab1, tab2)
-    # plot1 = column(bokeh_select_scale([tab1, tab2]))
 
     # make new cases plot
-    plot2 = bokeh_canvas("Date", "New Cases")
-    boheh_add_vbars(plot2, dates, new_cases, legend="Confirmed", color="red")
-    boheh_add_vbars(plot2, dates, new_cases_r, legend="Recovered", color="green")
-    boheh_add_vbars(plot2, dates, new_cases_d, legend="Died", color="black")
+    plot2 = bokeh_canvas(None, "New Cases", hover=True)
+    boheh_add_vbars(plot2, dates, new_cases, name="Confirmed", color="red")
+    boheh_add_vbars(plot2, dates, new_cases_r, name="Recovered", color="green")
+    boheh_add_vbars(plot2, dates, new_cases_d, name="Died", color="black")
 
     # create linear tab for deaths
-    tab1 = bokeh_canvas("Date", "Cumulative Deaths", hover=True)
-    boheh_add_line(tab1, dates, count_d, color="black")
+    tab1 = bokeh_canvas(None, "Cumulative Deaths", hover=True)
+    boheh_add_line(tab1, dates, count_d, name="Died", legend=False, color="black")
 
     # create log tab for cases
-    tab2 = bokeh_canvas("Date", "Cumulative Deaths", logscale=True, hover=True)
-    boheh_add_line(tab2, dates, count_d, color="black")
+    tab2 = bokeh_canvas(None, "Cumulative Deaths", logscale=True, hover=True)
+    boheh_add_line(tab2, dates, count_d, name="Died", legend=False, color="black")
 
     # add death label
     tab1.add_layout(death_rate_label)
@@ -221,20 +268,81 @@ def countries(countries, title=None, debug=False):
     plot3 = bokeh_lin_log_tabs(tab1, tab2)
 
     # make new cases plot
-    plot4 = bokeh_canvas("Date", "New Deaths")
-    boheh_add_vbars(plot4, dates, new_cases_d, color="black")
+    plot4 = bokeh_canvas(None, "New Deaths", hover=True)
+    boheh_add_vbars(plot4, dates, new_cases_d, name="Died", legend=False, color="black")
+
+    # title for html file
+    title = "<p>" + title + "</p>"
+    title = Div(text=title)
 
     # put plots into a column
     plots = column(plot1, plot2, plot3, plot4, sizing_mode="scale_width")
-    # plots = column(plot1, plot2, sizing_mode="scale_width")
+
+    return plots
+
+
+def plot_region(countries_all, title=None, number=3):
+    """ Plot region data with Bokeh.
+
+        Make four graphs: cumulative cases (with max countries),
+        cumulative deaths (with max countries), cases per capita,
+        deaths per capita. Save bokeh output into html file.
+
+        Paremeters
+        ----------
+        countries_all : list
+        List of all countries in the region. 
+        title: string
+            Title of the plot.
+        
+        Returns
+        -------
+        plots: bokeh plots as a column
+    """
+
+    # count confirmed cases
+    count_c, dates = extract.get_countries(countries_all, data.confirmed)
+    dates = pandas.to_datetime(dates)
+
+    # check if dataset empty
+    if count_c.any() == 0:
+        print("Data set empty. Probably you misspelled country name.")
+        return
+
+    # count death cases
+    count_d, dates_d = extract.get_countries(countries_all, data.death)
+    dates = pandas.to_datetime(dates_d)
+
+    # get max countries (cuntries with max cases)
+    max_confirmed = region.max_countries(countries_all, data.confirmed, number=number)
+    max_deaths = region.max_countries(countries_all, data.death, number=number)
+
+    # plot confirmed
+    plot1 = bokeh_canvas(None, "Cumulative Confirmed Cases", hover=True)
+    bokeh_vstack_region(plot1, max_confirmed, dates, count_c, data.confirmed)
+
+    # plot deaths
+    plot2 = bokeh_canvas(None, "Cumulative Deaths", hover=True)
+    bokeh_vstack_region(plot2, max_deaths, dates, count_d, data.death)
 
     # title for html file
-    title = "<h2>" + title + "</h2>"
+    title = "<h3>" + title + "</h3>"
     title = Div(text=title)
 
-    # save output to html file
-    output_file(constants.FILE_BOKEH)
-    save(column(title, plots))
+    # put plots into a column
+    plots = column(plot1, plot2, sizing_mode="scale_width")
+
+    return plots
+
+
+def make_all_plots_region(countries_all, title=None, number=3):
+
+    plots_detailed = plot_countries(countries_all, title=title)
+
+    title_stacks = "Contribution of Individual Countries"
+    plots_stacks = plot_region(countries_all, title=title_stacks, number=number)
+
+    plots = column(plots_detailed, plots_stacks, sizing_mode="scale_width")
 
     return plots
 

@@ -1,6 +1,7 @@
 """ Extract countries for a region """
 # Get the countries in continents from countries.yaml
 import yaml
+import extract
 
 with open("countries.yaml", "r") as file:
     countries = yaml.load(file, Loader=yaml.FullLoader)
@@ -61,3 +62,37 @@ def get(region_name, countries, data, exclude=[]):
             region.remove(ex)
 
     return region, excluded
+
+
+def max_countries(region, data, number=3):
+    """ Returns the 3 (number) countries with most cases in the region.
+
+    Parameters
+    ----------
+    region : list
+        List of countries in the region.
+    data : numpy array
+        All data loaded from the csv file.
+
+    Returns
+    -------
+    countries: list
+        Returns the countries in with maximal number of cases in the region.
+
+    """
+
+    # not enough countries in one region
+    if number > len(region):
+        number = len(region)
+
+    all_countries = {}
+
+    for country in region:
+
+        count = extract.get_country(country, data)
+
+        all_countries[country] = count[0][-1]
+
+    all_countries = sorted(all_countries, key=all_countries.get, reverse=True)
+
+    return all_countries[:number]
