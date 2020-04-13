@@ -60,40 +60,41 @@ data.confirmed, data.death, data.recovered = data.load(
 
 if __name__ == "__main__":
 
-    figure = None
+    figures = None
 
     if args.country:
         country = args.country
-        figure = plot.plot_countries([str(country)], title=country)
+        figures = plot.plot_countries([str(country)], title=country)
     elif args.region and args.exclude:
         region_name = args.region
         region, excluded = region.get(
             region_name, region.countries, data.confirmed, exclude=[str(args.exclude)]
         )
         if region and excluded:
-            figure = plot.make_all_plots_region(
+            figures = plot.make_all_plots_region(
                 region, title=region_name + " excluding " + args.exclude
             )
         elif region:
             print(args.exclude + " not in " + args.region)
             print("Plotting data for the whole region.")
-            figure = plot.make_all_plots_region(region, title=region_name)
+            figures = plot.make_all_plots_region(region, title=region_name)
     elif args.region:
         region_name = args.region
         region, _ = region.get(region_name, region.countries, data.confirmed)
         if region:
-            figure = plot.make_all_plots_region(region, title=region_name)
+            figures = plot.make_all_plots_region(region, title=region_name)
     elif args.update:
         print("\n\nFresh data downloaded.")
     else:
         print("\nNo country selected. Plotting data for whole world.")
         world, _ = region.get("World", region.countries, data.confirmed)
         if world:
-            figure = plot.make_all_plots_region(world, title="World", number=6)
+            figures = plot.make_all_plots_region(world, title="World", number=6)
 
-    if figure:
-        plot.embed(figure)
+    if figures:
+
+        plot.embed(figures)
 
         # save output to html file
         bokeh.io.output_file(constants.FILE_BOKEH)
-        bokeh.io.save(figure)
+        bokeh.io.save(figures)

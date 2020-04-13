@@ -16,6 +16,7 @@ from bokeh.models import (
     ColumnDataSource,
     Select,
     CustomJS,
+    RadioButtonGroup,
 )
 from bokeh.layouts import column, row
 from bokeh.plotting import figure
@@ -169,14 +170,88 @@ def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False):
     return plot
 
 
-def bokeh_lin_log_tabs(tab1, tab2):
+def bokeh_lin_log_tabs(tab1, tab2, name=None):
     """ Create linar and logarithmic tabs from two plots.
     """
 
     tab1 = Panel(child=tab1, title="Linear")
     tab2 = Panel(child=tab2, title="Logarithmic")
 
-    return Tabs(tabs=[tab1, tab2])
+    return Tabs(tabs=[tab1, tab2], name=name)
+
+
+def toggle_lin_log_scale(fig1, fig2):
+
+    figs = [fig1, fig2]
+
+    fig2.visible = False
+
+    toggle = RadioButtonGroup(
+        labels=["Linear", "Logarithmic"], width=120, height=30, active=0
+    )
+
+    callback = CustomJS(
+        args=dict(figs=figs),
+        code="""
+        let active = cb_obj.active;
+        
+        if (cb_obj.active == 1){
+            figs[0].visible = false;
+            figs[1].visible = true;
+        }
+        else{
+            figs[0].visible = true;
+            figs[1].visible = false;
+        }
+    """,
+    )
+
+    toggle.js_on_click(callback)
+
+    return column([toggle] + figs)
+
+
+def select_figure(figs, title="Select Country"):
+    names = [fig.name for fig in figs]
+    selector = Select(
+        title=title,
+        value=names[0],
+        options=names,
+        width=300,
+        height=50,
+        sizing_mode="fixed",
+    )
+
+    for fig in figs[1:]:
+        fig.visible = False
+
+    # figs.reverse()
+
+    callback = CustomJS(
+        args=dict(figs=figs),
+        code="""
+        let selected = cb_obj.value;
+        for(let fig of figs){
+            fig.visible = fig.name == selected;
+        }
+    """,
+    )
+
+    selector.js_on_change("value", callback)
+
+    return [selector] + figs
+
+
+def create_countries_selector(countries):
+
+    plots = []
+
+    for country in countries:
+        plot = plot_countries([country])
+        plot.name = country
+        plots.append(plot)
+
+    return column(select_figure(plots), sizing_mode="stretch_width")
 
 
 def plot_countries(countries, title=None):
@@ -244,7 +319,7 @@ def plot_countries(countries, title=None):
     boheh_add_line(tab2, dates, count_d, name="Died", color="black")
 
     # make tabs cases
-    plot1 = bokeh_lin_log_tabs(tab1, tab2)
+    plot1 = toggle_lin_log_scale(tab1, tab2)
 
     # make new cases plot
     plot2 = bokeh_canvas(None, "New Cases", hover=True)
@@ -265,15 +340,16 @@ def plot_countries(countries, title=None):
     tab2.add_layout(death_rate_label)
 
     # make tabs deaths
-    plot3 = bokeh_lin_log_tabs(tab1, tab2)
+    plot3 = toggle_lin_log_scale(tab1, tab2)
 
     # make new cases plot
     plot4 = bokeh_canvas(None, "New Deaths", hover=True)
     boheh_add_vbars(plot4, dates, new_cases_d, name="Died", legend=False, color="black")
 
     # title for html file
-    title = "<p>" + title + "</p>"
-    title = Div(text=title)
+    if title:
+        title = "<p>" + title + "</p>"
+        title = Div(text=title)
 
     # put plots into a column
     plots = column(plot1, plot2, plot3, plot4, sizing_mode="scale_width")
@@ -281,7 +357,7 @@ def plot_countries(countries, title=None):
     return plots
 
 
-def plot_region(countries_all, title=None, number=3):
+def plot_region_stacks(countries_all, title=None, number=3):
     """ Plot region data with Bokeh.
 
         Make four graphs: cumulative cases (with max countries),
@@ -326,8 +402,9 @@ def plot_region(countries_all, title=None, number=3):
     bokeh_vstack_region(plot2, max_deaths, dates, count_d, data.death)
 
     # title for html file
-    title = "<h3>" + title + "</h3>"
-    title = Div(text=title)
+    if title:
+        title = "<h3>" + title + "</h3>"
+        title = Div(text=title)
 
     # put plots into a column
     plots = column(plot1, plot2, sizing_mode="scale_width")
@@ -340,16 +417,34 @@ def make_all_plots_region(countries_all, title=None, number=3):
     plots_detailed = plot_countries(countries_all, title=title)
 
     title_stacks = "Contribution of Individual Countries"
-    plots_stacks = plot_region(countries_all, title=title_stacks, number=number)
 
-    plots = column(plots_detailed, plots_stacks, sizing_mode="scale_width")
+    plots_stacks = plot_region_stacks(countries_all, title=title_stacks, number=number)
 
-    return plots
+    selector_countries = region.countries_at_least(countries_all, data.confirmed)
+
+    plots_selectors = create_countries_selector(selector_countries)
+
+    return plots_detailed, plots_stacks, plots_selectors
 
 
 def embed(figures):
-    script, div = components(figures)
 
-    with open(constants.FILE_BOKEH_EMBED, "w") as f:
-        f.write(div)
-        f.write(script)
+    if type(figures) == tuple and len(figures) == 3:
+
+        script, div = components(figures[0])
+
+        with open(constants.FILE_BOKEH_EMBED_DETAILS, "w") as f:
+            f.write(div)
+            f.write(script)
+
+        script, div = components(figures[1])
+
+        with open(constants.FILE_BOKEH_EMBED_STACKS, "w") as f:
+            f.write(div)
+            f.write(script)
+
+        script, div = components(figures[2])
+
+        with open(constants.FILE_BOKEH_EMBED_SELECTORS, "w") as f:
+            f.write(div)
+            f.write(script)

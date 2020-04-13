@@ -17,7 +17,7 @@ ideas.md
 
 # bokeh output
 bokeh.html
-embed.bokeh
+*.bokeh
 
 # shell scripts
 update.sh

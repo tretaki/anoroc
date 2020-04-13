@@ -96,3 +96,37 @@ def max_countries(region, data, number=3):
     all_countries = sorted(all_countries, key=all_countries.get, reverse=True)
 
     return all_countries[:number]
+
+
+def countries_at_least(region, data, number_cases=1000):
+    """ Returns the countries with as least 1000 (number_cases) in the region.
+
+    Parameters
+    ----------
+    region : list
+        List of countries in the region.
+    data : numpy array
+        All data loaded from the csv file.
+
+    Returns
+    -------
+    countries: list
+        Returns the countries in with maximal number of cases in the region.
+
+    """
+
+    all_countries = {}
+
+    for country in region:
+
+        count = extract.get_country(country, data)
+
+        all_countries[country] = count[0][-1]
+
+    # extract countries with at least number_cases of cases
+    countries = {k: v for (k, v) in all_countries.items() if v > number_cases}
+
+    # get the list sorted by the number of cases
+    countries = sorted(countries, key=all_countries.get, reverse=True)
+
+    return countries
