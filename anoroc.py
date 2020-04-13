@@ -89,7 +89,7 @@ if __name__ == "__main__":
         print("\nNo country selected. Plotting data for whole world.")
         world, _ = region.get("World", region.countries, data.confirmed)
         if world:
-            figures = plot.make_all_plots_region(world, title="World", number=6)
+            figures = plot.make_all_plots_region(world, title="World", number=7)
 
     if figures:
 

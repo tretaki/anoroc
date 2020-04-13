@@ -27,7 +27,54 @@ WIDTH = 700
 HEIGHT = 350
 
 
-def bokeh_vstack_region(
+def bokeh_vstack_bar_region(
+    figure, max, xdata, count_all, data_all, color="black", alpha=0.5
+):
+
+    """ Creates a vstack plot on a bokeh canvas.
+    """
+
+    # constants
+    bar_width = 50000000  # with the datetime axis, the width is defined in seconds
+    legend_location = "top_left"
+
+    # data for producing vstack plot
+    data_vstack = {}
+    data_vstack["Dates"] = xdata
+
+    # rest of countries
+    rest = count_all.copy()
+
+    # create data sources
+    for country in max:
+        count_country, dates = extract.get_countries([country], data_all)
+        new_country = count_country - numpy.insert(count_country, 0, 0)[:-1]
+        data_vstack[country] = new_country
+
+        # subtract country data form the rest
+        rest -= new_country
+
+    data_vstack["Others"] = rest
+
+    stacks = max.copy()
+    stacks.append("Others")
+
+    figure.vbar_stack(
+        stackers=stacks,
+        x="Dates",
+        color=brewer["Spectral"][len(stacks)],
+        legend_label=stacks,
+        source=data_vstack,
+        width=bar_width,
+        line_color=color,
+        line_width=0.5,
+    )
+
+    figure.legend.items.reverse()
+    figure.legend.location = legend_location
+
+
+def bokeh_vstack_area_region(
     figure, max, xdata, count_all, data_all, color="black", alpha=0.5
 ):
 
@@ -39,7 +86,7 @@ def bokeh_vstack_region(
     data_vstack["Dates"] = xdata
 
     # rest of countries
-    rest = count_all
+    rest = count_all.copy()
 
     # create data sources
     for country in max:
@@ -51,7 +98,7 @@ def bokeh_vstack_region(
 
     data_vstack["Others"] = rest
 
-    stacks = max
+    stacks = max.copy()
     stacks.append("Others")
 
     figure.varea_stack(
@@ -113,7 +160,7 @@ def boheh_add_vbars(
     """
 
     # constants
-    bar_width = 50000000
+    bar_width = 50000000  # with the datetime axis, the width is defined in seconds
     legend_location = "top_left"
 
     # data
@@ -122,7 +169,7 @@ def boheh_add_vbars(
 
     # add bars
     properties = dict(
-        width=bar_width, color=color, alpha=alpha, name=name, source=source
+        width=bar_width, color=color, alpha=alpha, name=name, source=source,
     )
     if legend:
         properties["legend_label"] = name
@@ -378,6 +425,7 @@ def plot_region_stacks(countries_all, title=None, number=3):
 
     # count confirmed cases
     count_c, dates = extract.get_countries(countries_all, data.confirmed)
+    new_cases_c = count_c - numpy.insert(count_c, 0, 0)[:-1]
     dates = pandas.to_datetime(dates)
 
     # check if dataset empty
@@ -387,6 +435,7 @@ def plot_region_stacks(countries_all, title=None, number=3):
 
     # count death cases
     count_d, dates_d = extract.get_countries(countries_all, data.death)
+    new_cases_d = count_d - numpy.insert(count_d, 0, 0)[:-1]
     dates = pandas.to_datetime(dates_d)
 
     # get max countries (cuntries with max cases)
@@ -395,11 +444,19 @@ def plot_region_stacks(countries_all, title=None, number=3):
 
     # plot confirmed
     plot1 = bokeh_canvas(None, "Cumulative Confirmed Cases", hover=True)
-    bokeh_vstack_region(plot1, max_confirmed, dates, count_c, data.confirmed)
+    bokeh_vstack_area_region(plot1, max_confirmed, dates, count_c, data.confirmed)
+
+    # plot new confirmed
+    plot2 = bokeh_canvas(None, "New Confirmed Cases", hover=True)
+    bokeh_vstack_bar_region(plot2, max_confirmed, dates, new_cases_c, data.confirmed)
 
     # plot deaths
-    plot2 = bokeh_canvas(None, "Cumulative Deaths", hover=True)
-    bokeh_vstack_region(plot2, max_deaths, dates, count_d, data.death)
+    plot3 = bokeh_canvas(None, "Cumulative Deaths", hover=True)
+    bokeh_vstack_area_region(plot3, max_deaths, dates, count_d, data.death)
+
+    # plot new deaths
+    plot4 = bokeh_canvas(None, "New Deaths", hover=True)
+    bokeh_vstack_bar_region(plot4, max_deaths, dates, new_cases_d, data.death)
 
     # title for html file
     if title:
@@ -407,7 +464,7 @@ def plot_region_stacks(countries_all, title=None, number=3):
         title = Div(text=title)
 
     # put plots into a column
-    plots = column(plot1, plot2, sizing_mode="scale_width")
+    plots = column(plot1, plot2, plot3, plot4, sizing_mode="scale_width")
 
     return plots
 
@@ -422,7 +479,8 @@ def make_all_plots_region(countries_all, title=None, number=3):
 
     selector_countries = region.countries_at_least(countries_all, data.confirmed)
 
-    plots_selectors = create_countries_selector(selector_countries)
+    # plots_selectors = create_countries_selector(selector_countries)
+    plots_selectors = plots_stacks
 
     return plots_detailed, plots_stacks, plots_selectors
 
