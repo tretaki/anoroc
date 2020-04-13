@@ -479,8 +479,7 @@ def make_all_plots_region(countries_all, title=None, number=3):
 
     selector_countries = region.countries_at_least(countries_all, data.confirmed)
 
-    # plots_selectors = create_countries_selector(selector_countries)
-    plots_selectors = plots_stacks
+    plots_selectors = create_countries_selector(selector_countries)
 
     return plots_detailed, plots_stacks, plots_selectors
 
