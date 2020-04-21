@@ -108,6 +108,10 @@ def max_countries_per_capita(region, data, number=3, limit=50):
         List of countries in the region.
     data : numpy array
         All data loaded from the csv file.
+    number: int
+        How many countries in a returned list.
+    limit: int
+        If the cases over the limit country is included in the list.
 
     Returns
     -------

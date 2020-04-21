@@ -607,6 +607,12 @@ def plot_per_capita(countries_all, title=None):
         countries_all, data.death, number=13, limit=100
     )
 
+    # if there is no country returned reduce the cases limit to 20
+    if not countries_all_d:
+        countries_all_d = region.max_countries_per_capita(
+            countries_all, data.death, number=5, limit=20
+        )
+
     for country, color in zip(countries_all_d, colors):
         # get the data
         cases_per_capita, deaths_per_capita, dates = data_countries_per_capita(
