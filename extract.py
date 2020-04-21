@@ -55,3 +55,32 @@ def get_countries(countries, data):
         counts += count
 
     return counts, dates
+
+
+def get_population(countries_list, countries):
+    """ Extract the population data for countries in the list.
+
+    Parameters
+    ----------
+    countries_list : list
+        List of countries.
+    countries : dictionary
+        Dictionary from the countries FILE_COUNTRIES_LIST.
+
+    Returns
+    -------
+    countries: dictionary
+        Returns the dictionary[country] = popluation.
+    """
+
+    countries_population = {}
+
+    for region in countries:
+
+        for country in countries[region]:
+            if country in countries_list:
+                population = countries[region][country]["population"]
+                if population:
+                    countries_population[country] = population
+
+    return countries_population

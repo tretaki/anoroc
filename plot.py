@@ -21,7 +21,7 @@ from bokeh.models import (
 from bokeh.layouts import column, row
 from bokeh.plotting import figure
 from bokeh.embed import components
-from bokeh.palettes import brewer
+from bokeh.palettes import brewer, d3
 
 WIDTH = 700
 HEIGHT = 350
@@ -125,6 +125,35 @@ def boheh_add_line(
 
     # constants
     line_width = 3
+    legend_location = "top_left"
+
+    data = {"Dates": xdata, name: ydata}
+    source = ColumnDataSource(data)
+
+    # add line
+    figure.line(
+        "Dates",
+        name,
+        source=source,
+        line_width=line_width,
+        color=color,
+        name=name,
+        alpha=alpha,
+        legend_label=name,
+    )
+
+    if legend:
+        figure.legend.location = legend_location
+
+
+def boheh_add_line_points(
+    figure, xdata, ydata, name="Count", legend=True, color="red", alpha=0.7
+):
+    """ Adds dataset as line points to the bokeh figure.
+    """
+
+    # constants
+    line_width = 3
     point_size = 7
     legend_location = "top_left"
 
@@ -190,7 +219,7 @@ def bokeh_canvas(xlabel, ylabel, logscale=False, hover=False):
 
     # add hover
     if hover:
-        TOOLTIPS = "$name: @$name"
+        TOOLTIPS = "$name: @$name{i}"
     else:
         TOOLTIPS = None
 
@@ -272,8 +301,6 @@ def select_figure(figs, title="Select Country"):
     for fig in figs[1:]:
         fig.visible = False
 
-    # figs.reverse()
-
     callback = CustomJS(
         args=dict(figs=figs),
         code="""
@@ -341,7 +368,11 @@ def plot_countries(countries, title=None):
     # calculate death rate
     death_rate = count_d[-1] / count[-1] * 100.0
 
-    # make death rate label
+    # calculate deaths per capita
+    population = sum(extract.get_population(countries, region.countries).values())
+    death_per_capita = count_d[-1] / float(population) * 1e6
+
+    # make death rate label and per capita label
     death_rate_label = Label(
         x=10,
         y=HEIGHT * 0.75,
@@ -352,18 +383,28 @@ def plot_countries(countries, title=None):
         background_fill_color="white",
         background_fill_alpha=1.0,
     )
+    death_per_capita_label = Label(
+        x=10,
+        y=HEIGHT * 0.70,
+        x_units="screen",
+        y_units="screen",
+        text="Deaths per million: %3.1f" % death_per_capita,
+        text_font_size="10pt",
+        background_fill_color="white",
+        background_fill_alpha=1.0,
+    )
 
     # create linear tab for cases
     tab1 = bokeh_canvas(None, "Cumulative Cases", hover=True)
-    boheh_add_line(tab1, dates, count, name="Confirmed", color="red")
-    boheh_add_line(tab1, dates, count_r, name="Recovered", color="green")
-    boheh_add_line(tab1, dates, count_d, name="Died", color="black")
+    boheh_add_line_points(tab1, dates, count, name="Confirmed", color="red")
+    boheh_add_line_points(tab1, dates, count_r, name="Recovered", color="green")
+    boheh_add_line_points(tab1, dates, count_d, name="Died", color="black")
 
     # create log tab for cases
     tab2 = bokeh_canvas(None, "Cumulative Cases", logscale=True, hover=True)
-    boheh_add_line(tab2, dates, count, name="Confirmed", color="red")
-    boheh_add_line(tab2, dates, count_r, name="Recovered", color="green")
-    boheh_add_line(tab2, dates, count_d, name="Died", color="black")
+    boheh_add_line_points(tab2, dates, count, name="Confirmed", color="red")
+    boheh_add_line_points(tab2, dates, count_r, name="Recovered", color="green")
+    boheh_add_line_points(tab2, dates, count_d, name="Died", color="black")
 
     # make tabs cases
     plot1 = toggle_lin_log_scale(tab1, tab2)
@@ -376,15 +417,22 @@ def plot_countries(countries, title=None):
 
     # create linear tab for deaths
     tab1 = bokeh_canvas(None, "Cumulative Deaths", hover=True)
-    boheh_add_line(tab1, dates, count_d, name="Died", legend=False, color="black")
+    boheh_add_line_points(
+        tab1, dates, count_d, name="Died", legend=False, color="black"
+    )
 
     # create log tab for cases
     tab2 = bokeh_canvas(None, "Cumulative Deaths", logscale=True, hover=True)
-    boheh_add_line(tab2, dates, count_d, name="Died", legend=False, color="black")
+    boheh_add_line_points(
+        tab2, dates, count_d, name="Died", legend=False, color="black"
+    )
 
     # add death label
     tab1.add_layout(death_rate_label)
     tab2.add_layout(death_rate_label)
+    # add death per capita label
+    tab1.add_layout(death_per_capita_label)
+    tab2.add_layout(death_per_capita_label)
 
     # make tabs deaths
     plot3 = toggle_lin_log_scale(tab1, tab2)
@@ -408,8 +456,7 @@ def plot_region_stacks(countries_all, title=None, number=3):
     """ Plot region data with Bokeh.
 
         Make four graphs: cumulative cases (with max countries),
-        cumulative deaths (with max countries), cases per capita,
-        deaths per capita. Save bokeh output into html file.
+        cumulative deaths (with max countries). Save bokeh output into html file.
 
         Paremeters
         ----------
@@ -458,13 +505,119 @@ def plot_region_stacks(countries_all, title=None, number=3):
     plot4 = bokeh_canvas(None, "New Deaths", hover=True)
     bokeh_vstack_bar_region(plot4, max_deaths, dates, new_cases_d, data.death)
 
+    plots_per_capita = plot_per_capita(countries_all)
+
     # title for html file
     if title:
         title = "<h3>" + title + "</h3>"
         title = Div(text=title)
 
     # put plots into a column
-    plots = column(plot1, plot2, plot3, plot4, sizing_mode="scale_width")
+    plots = column(
+        plots_per_capita, plot1, plot2, plot3, plot4, sizing_mode="scale_width"
+    )
+
+    return plots
+
+
+def data_countries_per_capita(countries):
+    """ Extract per capita data for a country or list of countries.
+        Data is given per milion people.
+
+        Produce data: cumulative cases, cumulative deaths per capita.
+
+        Paremeters
+        ----------
+        countries : list
+        List of country names.
+        
+        Returns
+        -------
+        cases_per_capita: numpy array
+        deths_per_capita: numpy array
+        dates: numpy array
+    """
+
+    # count confirmed cases
+    count_c, dates = extract.get_countries(countries, data.confirmed)
+    dates = pandas.to_datetime(dates)
+
+    # count death cases
+    count_d, dates_d = extract.get_countries(countries, data.death)
+
+    countries_population = extract.get_population(countries, region.countries)
+
+    total_population = sum(countries_population.values())
+
+    cases_per_capita = count_c / float(total_population) * 1e6
+    deaths_per_capita = count_d / float(total_population) * 1e6
+
+    return cases_per_capita, deaths_per_capita, dates
+
+
+def plot_per_capita(countries_all, title=None):
+    """ Plot per capita cases with bokeh.
+
+        Make two graphs: cumulative cases, cumulative deaths per capita.
+
+        Paremeters
+        ----------
+        countries_all : list
+        List of all countries you wanna plot.
+        title: string
+            Title of the plot.
+        
+        Returns
+        -------
+        plots: bokeh plots as a column
+    """
+
+    # plot for cases
+    plot1 = bokeh_canvas(None, "Confirmed Cases per million Inhabitants", hover=True)
+
+    # plot for deaths
+    plot2 = bokeh_canvas(None, "Deaths per million Inhabitants", hover=True)
+
+    # fix hover tool to show decimals
+    hover = plot1.select(dict(type=HoverTool))
+    TOOLTIPS = "$name: @$name{4.1f}"
+    hover.tooltips = TOOLTIPS
+    hover = plot2.select(dict(type=HoverTool))
+    hover.tooltips = TOOLTIPS
+
+    colors = d3["Category20"][20]
+
+    # take only first 13 countries
+    countries_all_c = region.max_countries_per_capita(
+        countries_all, data.confirmed, number=13, limit=1000,
+    )
+
+    for country, color in zip(countries_all_c, colors):
+        # get the data
+        cases_per_capita, deaths_per_capita, dates = data_countries_per_capita(
+            [country]
+        )
+
+        boheh_add_line(
+            plot1, dates, cases_per_capita, name=country, color=color, alpha=1.0
+        )
+
+    # take only first 13 countries
+    countries_all_d = region.max_countries_per_capita(
+        countries_all, data.death, number=13, limit=100
+    )
+
+    for country, color in zip(countries_all_d, colors):
+        # get the data
+        cases_per_capita, deaths_per_capita, dates = data_countries_per_capita(
+            [country]
+        )
+
+        boheh_add_line(
+            plot2, dates, deaths_per_capita, name=country, color=color, alpha=1.0
+        )
+
+    plots = column(plot1, plot2, sizing_mode="scale_width")
 
     return plots
 

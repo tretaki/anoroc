@@ -1,244 +1,720 @@
 Africa:
-  - Algeria
-  - Angola
-  - Botswana
-  - Burundi
-  - Cameroon
-  - Cabo Verde
-  - Central African Republic
-  - Chad
-  - Comoros
-  - Mayotte
-  - Congo (Brazzaville)
-  - Congo (Kinshasa)
-  - Benin
-  - Equatorial Guinea
-  - Ethiopia
-  - Eritrea
-  - Djibouti
-  - Gabon
-  - Gambia, The
-  - Ghana
-  - Guinea
-  - Cote d'Ivoire
-  - Kenya
-  - Lesotho
-  - Liberia
-  - Madagascar
-  - Malawi
-  - Mali
-  - Mauritania
-  - Mauritius
-  - Morocco
-  - Mozambique
-  - Namibia
-  - Niger
-  - Nigeria
-  - Guinea-Bissau
-  - Reunion
-  - Rwanda
-  - Saint Helena
-  - Sao Tome and Principe
-  - Senegal
-  - Seychelles
-  - Sierra Leone
-  - Somalia
-  - South Africa
-  - Zimbabwe
-  - South Sudan
-  - Western Sahara
-  - Sudan
-  - Eswatini
-  - Togo
-  - Tunisia
-  - Uganda
-  - Egypt
-  - Tanzania
-  - Burkina Faso
-  - Zambia
+  Algeria:
+    code: DZA
+    population: 42228429
+  Angola:
+    code: AGO
+    population: 30809762
+  Benin:
+    code: BEN
+    population: 11485048
+  Botswana:
+    code: BWA
+    population: 2254126
+  Burkina Faso:
+    code: BFA
+    population: 19751535
+  Burundi:
+    code: BDI
+    population: 11175378
+  Cabo Verde:
+    code: CPV
+    population: 543767
+  Cameroon:
+    code: CMR
+    population: 25216237
+  Central African Republic:
+    code: CAF
+    population: 4666377
+  Chad:
+    code: TCD
+    population: 15477751
+  Comoros:
+    code: COM
+    population: 832322
+  Congo (Brazzaville):
+    code: COG
+    population: 5244363
+  Congo (Kinshasa):
+    code: COD
+    population: 84068091
+  Cote d'Ivoire:
+    code: CIV
+    population: 25069229
+  Djibouti:
+    code: DJI
+    population: 958920
+  Egypt:
+    code: EGY
+    population: 98423595
+  Equatorial Guinea:
+    code: GNQ
+    population: 1308974
+  Eritrea:
+    code: ERI
+    population: null
+  Eswatini:
+    code: SWZ
+    population: 1136191
+  Ethiopia:
+    code: ETH
+    population: 109224559
+  Gabon:
+    code: GAB
+    population: 2119275
+  Gambia:
+    code: GMB
+    population: 2280102
+  Ghana:
+    code: GHA
+    population: 29767108
+  Guinea:
+    code: GIN
+    population: 12414318
+  Guinea-Bissau:
+    code: GNB
+    population: 1874309
+  Kenya:
+    code: KEN
+    population: 51393010
+  Lesotho:
+    code: LSO
+    population: 2108132
+  Liberia:
+    code: LBR
+    population: 4818977
+  Libya:
+    code: LBY
+    population: 6678567
+  Madagascar:
+    code: MDG
+    population: 26262368
+  Malawi:
+    code: MWI
+    population: 18143315
+  Mali:
+    code: MLI
+    population: 19077690
+  Mauritania:
+    code: MRT
+    population: 4403319
+  Mauritius:
+    code: MUS
+    population: 1265303
+  Mayotte:
+    code: MYT
+    population: null
+  Morocco:
+    code: MAR
+    population: 36029138
+  Mozambique:
+    code: MOZ
+    population: 29495962
+  Namibia:
+    code: NAM
+    population: 2448255
+  Niger:
+    code: NER
+    population: 22442948
+  Nigeria:
+    code: NGA
+    population: 195874740
+  Reunion:
+    code: REU
+    population: null
+  Rwanda:
+    code: RWA
+    population: 12301939
+  Saint Helena:
+    code: SHN
+    population: null
+  Sao Tome and Principe:
+    code: STP
+    population: 211028
+  Senegal:
+    code: SEN
+    population: 15854360
+  Seychelles:
+    code: SYC
+    population: 96762
+  Sierra Leone:
+    code: SLE
+    population: 7650154
+  Somalia:
+    code: SOM
+    population: 15008154
+  South Africa:
+    code: ZAF
+    population: 57779622
+  South Sudan:
+    code: SSD
+    population: 10975920
+  Sudan:
+    code: SDN
+    population: 41801533
+  Tanzania:
+    code: TZA
+    population: 56318348
+  Togo:
+    code: TGO
+    population: 7889094
+  Tunisia:
+    code: TUN
+    population: 11565204
+  Uganda:
+    code: UGA
+    population: 42723139
+  Western Sahara:
+    code: ESH
+    population: null
+  Zambia:
+    code: ZMB
+    population: 17351822
+  Zimbabwe:
+    code: ZWE
+    population: 14439018
 Asia:
-  - Afghanistan
-  - Bahrain
-  - Bangladesh
-  - Bhutan
-  - Brunei
-  - Myanmar
-  - Cambodia
-  - Sri Lanka
-  - China
-  - Taiwan*
-  - Christmas Island
-  - Palestinian Territory
-  - Hong Kong
-  - India
-  - Indonesia
-  - Iran
-  - Iraq
-  - Israel
-  - Japan
-  - Kazakhstan
-  - Jordan
-  - Korea, North
-  - Korea, South
-  - Kuwait
-  - Kyrgyzstan
-  - Laos
-  - Lebanon
-  - Macao
-  - Malaysia
-  - Maldives
-  - Mongolia
-  - Oman
-  - Nepal
-  - Pakistan
-  - Philippines
-  - Timor-Leste
-  - Qatar
-  - Saudi Arabia
-  - Singapore
-  - Vietnam
-  - Syrian Arab Republic
-  - Tajikistan
-  - Thailand
-  - United Arab Emirates
-  - Turkey
-  - Turkmenistan
-  - Uzbekistan
-  - Yemen
-  - Spratly Islands
+  Afghanistan:
+    code: AFG
+    population: 37172386
+  Bahrain:
+    code: BHR
+    population: 1569439
+  Bangladesh:
+    code: BGD
+    population: 161356039
+  Bhutan:
+    code: BTN
+    population: 754394
+  Brunei:
+    code: BRN
+    population: 428962
+  Burma:
+    code: MMR
+    population: 53708395
+  Cambodia:
+    code: KHM
+    population: 16249798
+  China:
+    code: CHN
+    population: 1392730000
+  Christmas Island:
+    code: CXR
+    population: null
+  Hong Kong:
+    code: HKG
+    population: 7451000
+  India:
+    code: IND
+    population: 1352617328
+  Indonesia:
+    code: IDN
+    population: 267663435
+  Iran:
+    code: IRN
+    population: 81800269
+  Iraq:
+    code: IRQ
+    population: 38433600
+  Israel:
+    code: ISR
+    population: 8882800
+  Japan:
+    code: JPN
+    population: 126529100
+  Jordan:
+    code: JOR
+    population: 9956011
+  Kazakhstan:
+    code: KAZ
+    population: 18272430
+  Korea, North:
+    code: PRK
+    population: 25549819
+  Korea, South:
+    code: KOR
+    population: 51606633
+  Kuwait:
+    code: KWT
+    population: 4137309
+  Kyrgyzstan:
+    code: KGZ
+    population: 6322800
+  Laos:
+    code: LAO
+    population: 7061507
+  Lebanon:
+    code: LBN
+    population: 6848925
+  Macao:
+    code: MAC
+    population: 631636
+  Malaysia:
+    code: MYS
+    population: 31528585
+  Maldives:
+    code: MDV
+    population: 515696
+  Mongolia:
+    code: MNG
+    population: 3170208
+  Nepal:
+    code: NPL
+    population: 28087871
+  Oman:
+    code: OMN
+    population: 4829483
+  Pakistan:
+    code: PAK
+    population: 212215030
+  Philippines:
+    code: PHL
+    population: 106651922
+  Qatar:
+    code: QAT
+    population: 2781677
+  Saudi Arabia:
+    code: SAU
+    population: 33699947
+  Singapore:
+    code: SGP
+    population: 5638676
+  Spratly Islands:
+    code: null
+    population: null
+  Sri Lanka:
+    code: LKA
+    population: 21670000
+  Syria:
+    code: SYR
+    population: 16906283
+  Taiwan*:
+    code: TWN
+    population: null
+  Tajikistan:
+    code: TJK
+    population: 9100837
+  Thailand:
+    code: THA
+    population: 69428524
+  Timor-Leste:
+    code: TLS
+    population: 1267972
+  Turkey:
+    code: TUR
+    population: 82319724
+  Turkmenistan:
+    code: TKM
+    population: 5850908
+  United Arab Emirates:
+    code: ARE
+    population: 9630959
+  Uzbekistan:
+    code: UZB
+    population: 32955400
+  Vietnam:
+    code: VNM
+    population: 95540395
+  West Bank and Gaza:
+    code: PSE
+    population: 4569087
+  Yemen:
+    code: YEM
+    population: 28498687
 Europe:
-  - Albania
-  - Andorra
-  - Azerbaijan
-  - Austria
-  - Armenia
-  - Belgium
-  - Bosnia and Herzegovina
-  - Bulgaria
-  - Belarus
-  - Croatia
-  - Cyprus
-  - Czechia
-  - Denmark
-  - Estonia
-  - Faroe Islands
-  - Finland
-  - France
-  - Georgia
-  - Germany
-  - Gibraltar
-  - Greece
-  - Holy See
-  - Hungary
-  - Iceland
-  - Ireland
-  - Italy
-  - Kosovo
-  - Latvia
-  - Liechtenstein
-  - Lithuania
-  - Luxembourg
-  - Malta
-  - Monaco
-  - Moldova
-  - Montenegro
-  - Netherlands
-  - Norway
-  - Poland
-  - Portugal
-  - Romania
-  - Russia
-  - San Marino
-  - Serbia
-  - Slovakia
-  - Slovenia
-  - Spain
-  - Sweden
-  - Switzerland
-  - Ukraine
-  - North Macedonia
-  - United Kingdom
+  Albania:
+    code: ALB
+    population: 2866376
+  Andorra:
+    code: AND
+    population: 77006
+  Armenia:
+    code: ARM
+    population: 2951776
+  Austria:
+    code: AUT
+    population: 8840521
+  Azerbaijan:
+    code: AZE
+    population: 9939800
+  Belarus:
+    code: BLR
+    population: 9483499
+  Belgium:
+    code: BEL
+    population: 11433256
+  Bosnia and Herzegovina:
+    code: BIH
+    population: 3323929
+  Bulgaria:
+    code: BGR
+    population: 7025037
+  Croatia:
+    code: HRV
+    population: 4087843
+  Cyprus:
+    code: CYP
+    population: 1189265
+  Czechia:
+    code: CZE
+    population: 10629928
+  Denmark:
+    code: DNK
+    population: 5793636
+  Estonia:
+    code: EST
+    population: 1321977
+  Faroe Islands:
+    code: FRO
+    population: 48497
+  Finland:
+    code: FIN
+    population: 5515525
+  France:
+    code: FRA
+    population: 66977107
+  Georgia:
+    code: GEO
+    population: 3726549
+  Germany:
+    code: DEU
+    population: 82905782
+  Gibraltar:
+    code: GIB
+    population: 33718
+  Greece:
+    code: GRC
+    population: 10731726
+  Holy See:
+    code: VAT
+    population: null
+  Hungary:
+    code: HUN
+    population: 9775564
+  Iceland:
+    code: ISL
+    population: 352721
+  Ireland:
+    code: IRL
+    population: 4867309
+  Italy:
+    code: ITA
+    population: 60421760
+  Kosovo:
+    code: XKX
+    population: 1845300
+  Latvia:
+    code: LVA
+    population: 1927174
+  Liechtenstein:
+    code: LIE
+    population: 37910
+  Lithuania:
+    code: LTU
+    population: 2801543
+  Luxembourg:
+    code: LUX
+    population: 607950
+  Malta:
+    code: MLT
+    population: 484630
+  Moldova:
+    code: MDA
+    population: 2706049
+  Monaco:
+    code: MCO
+    population: 38682
+  Montenegro:
+    code: MNE
+    population: 622227
+  Netherlands:
+    code: NLD
+    population: 17231624
+  North Macedonia:
+    code: MKD
+    population: 2082958
+  Norway:
+    code: NOR
+    population: 5311916
+  Poland:
+    code: POL
+    population: 37974750
+  Portugal:
+    code: PRT
+    population: 10283822
+  Romania:
+    code: ROU
+    population: 19466145
+  Russia:
+    code: RUS
+    population: 144478050
+  San Marino:
+    code: SMR
+    population: 33785
+  Serbia:
+    code: SRB
+    population: 6982604
+  Slovakia:
+    code: SVK
+    population: 5446771
+  Slovenia:
+    code: SVN
+    population: 2073894
+  Spain:
+    code: ESP
+    population: 46796540
+  Sweden:
+    code: SWE
+    population: 10175214
+  Switzerland:
+    code: CHE
+    population: 8513227
+  Ukraine:
+    code: UKR
+    population: 44622516
+  United Kingdom:
+    code: GBR
+    population: 66460344
 North America:
-  - Antigua and Barbuda
-  - Bahamas, The
-  - Barbados
-  - Bermuda
-  - Belize
-  - British Virgin Islands
-  - Canada
-  - Cayman Islands
-  - Costa Rica
-  - Cuba
-  - Dominica
-  - Dominican Republic
-  - El Salvador
-  - Greenland
-  - Grenada
-  - Guadeloupe
-  - Guatemala
-  - Haiti
-  - Honduras
-  - Jamaica
-  - Martinique
-  - Mexico
-  - Montserrat
-  - Netherlands Antilles
-  - Curaçao
-  - Aruba
-  - Bonaire
-  - Nicaragua
-  - Panama
-  - Puerto Rico
-  - Saint Barthelemy
-  - Saint Kitts and Nevis
-  - Anguilla
-  - Saint Lucia
-  - Saint Martin
-  - Saint Pierre and Miquelon
-  - Saint Vincent and the Grenadines
-  - Trinidad and Tobago
-  - Turks and Caicos Islands
-  - US
-  - United States Virgin Islands
+  Anguilla:
+    code: AIA
+    population: null
+  Antigua and Barbuda:
+    code: ATG
+    population: 96286
+  Aruba:
+    code: ABW
+    population: 105845
+  Bahamas:
+    code: BHS
+    population: 385640
+  Barbados:
+    code: BRB
+    population: 286641
+  Belize:
+    code: BLZ
+    population: 383071
+  Bermuda:
+    code: BMU
+    population: 63973
+  Bonaire:
+    code: null
+    population: null
+  British Virgin Islands:
+    code: VGB
+    population: 29802
+  Canada:
+    code: CAN
+    population: 37057765
+  Cayman Islands:
+    code: CYM
+    population: 64174
+  Costa Rica:
+    code: CRI
+    population: 4999441
+  Cuba:
+    code: CUB
+    population: 11338138
+  Curaçao:
+    code: CUW
+    population: 159800
+  Dominica:
+    code: DMA
+    population: 71625
+  Dominican Republic:
+    code: DOM
+    population: 10627165
+  El Salvador:
+    code: SLV
+    population: 6420744
+  Greenland:
+    code: GRL
+    population: 56025
+  Grenada:
+    code: GRD
+    population: 111454
+  Guadeloupe:
+    code: GLP
+    population: null
+  Guatemala:
+    code: GTM
+    population: 17247807
+  Haiti:
+    code: HTI
+    population: 11123176
+  Honduras:
+    code: HND
+    population: 9587522
+  Jamaica:
+    code: JAM
+    population: 2934855
+  Martinique:
+    code: MTQ
+    population: null
+  Mexico:
+    code: MEX
+    population: 126190788
+  Montserrat:
+    code: MSR
+    population: null
+  Netherlands Antilles:
+    code: ANT
+    population: null
+  Nicaragua:
+    code: NIC
+    population: 6465513
+  Panama:
+    code: PAN
+    population: 4176873
+  Puerto Rico:
+    code: PRI
+    population: 3195153
+  Saint Barthelemy:
+    code: null
+    population: null
+  Saint Kitts and Nevis:
+    code: KNA
+    population: 52441
+  Saint Lucia:
+    code: LCA
+    population: 181889
+  Saint Martin:
+    code: null
+    population: null
+  Saint Pierre and Miquelon:
+    code: SPM
+    population: null
+  Saint Vincent and the Grenadines:
+    code: VCT
+    population: 110210
+  Trinidad and Tobago:
+    code: TTO
+    population: 1389858
+  Turks and Caicos Islands:
+    code: TCA
+    population: 37665
+  US:
+    code: USA
+    population: 326687501
+  United States Virgin Islands:
+    code: VIR
+    population: 106977
 Oceania:
-  - American Samoa
-  - Australia
-  - Solomon Islands
-  - Cook Islands
-  - Fiji
-  - French Polynesia
-  - Kiribati
-  - Guam
-  - Nauru
-  - New Caledonia
-  - Vanuatu
-  - New Zealand
-  - Niue
-  - Norfolk Island
-  - Northern Mariana Islands
-  - United States Minor Outlying Islands
-  - Micronesia
-  - Marshall Islands
-  - Palau
-  - Papua New Guinea
-  - Pitcairn Islands
-  - Tokelau
-  - Tonga
-  - Tuvalu
-  - Wallis and Futuna
-  - Samoa
+  American Samoa:
+    code: ASM
+    population: 55465
+  Australia:
+    code: AUS
+    population: 24982688
+  Cook Islands:
+    code: COK
+    population: null
+  Fiji:
+    code: FJI
+    population: 883483
+  French Polynesia:
+    code: PYF
+    population: 277679
+  Guam:
+    code: GUM
+    population: 165768
+  Kiribati:
+    code: KIR
+    population: 115847
+  Marshall Islands:
+    code: MHL
+    population: 58413
+  Micronesia:
+    code: FSM
+    population: 112640
+  Nauru:
+    code: NRU
+    population: 12704
+  New Caledonia:
+    code: NCL
+    population: 284060
+  New Zealand:
+    code: NZL
+    population: 4841000
+  Niue:
+    code: NIU
+    population: null
+  Norfolk Island:
+    code: NFK
+    population: null
+  Northern Mariana Islands:
+    code: MNP
+    population: 56882
+  Palau:
+    code: PLW
+    population: 17907
+  Papua New Guinea:
+    code: PNG
+    population: 8606316
+  Pitcairn Islands:
+    code: PCN
+    population: null
+  Samoa:
+    code: WSM
+    population: 196130
+  Solomon Islands:
+    code: SLB
+    population: 652858
+  Tokelau:
+    code: TKL
+    population: null
+  Tonga:
+    code: TON
+    population: 103197
+  Tuvalu:
+    code: TUV
+    population: 11508
+  United States Minor Outlying Islands:
+    code: UMI
+    population: null
+  Vanuatu:
+    code: VUT
+    population: 292680
+  Wallis and Futuna:
+    code: WLF
+    population: null
 South America:
-  - Argentina
-  - Bolivia
-  - Brazil
-  - Chile
-  - Colombia
-  - Ecuador
-  - French Guiana
-  - Guyana
-  - Paraguay
-  - Peru
-  - Suriname
-  - Uruguay
-  - Venezuela
-
+  Argentina:
+    code: ARG
+    population: 44494502
+  Bolivia:
+    code: BOL
+    population: 11353142
+  Brazil:
+    code: BRA
+    population: 209469333
+  Chile:
+    code: CHL
+    population: 18729160
+  Colombia:
+    code: COL
+    population: 49648685
+  Ecuador:
+    code: ECU
+    population: 17084357
+  French Guiana:
+    code: GUF
+    population: null
+  Guyana:
+    code: GUY
+    population: 779004
+  Paraguay:
+    code: PRY
+    population: 6956071
+  Peru:
+    code: PER
+    population: 31989256
+  Suriname:
+    code: SUR
+    population: 575991
+  Uruguay:
+    code: URY
+    population: 3449299
+  Venezuela:
+    code: VEN
+    population: 28870195
