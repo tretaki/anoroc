@@ -7,6 +7,12 @@ import constants
 with open(constants.FILE_COUNTRIES_LIST, "r") as file:
     countries = yaml.load(file, Loader=yaml.FullLoader)
 
+with open(constants.FILE_US_STATES_LIST, "r") as file:
+    states = yaml.load(file, Loader=yaml.FullLoader)
+
+# add us states list to countries list
+countries["United States"] = states["United States"]
+
 
 def get(region_name, countries, data, exclude=[]):
     """ Makes a list of countries in the region.
@@ -34,7 +40,7 @@ def get(region_name, countries, data, exclude=[]):
 
     if region_name not in continents:
         print(
-            "Region name not valid. Choose from: \nAfrica, Asia, Europe, North America, Oceania, South America"
+            "Region name not valid. Choose from: \nAfrica, Asia, Europe, North America, Oceania, South America, United States"
         )
         return None, None
 
@@ -43,7 +49,8 @@ def get(region_name, countries, data, exclude=[]):
     # make the list of countries on certain continent or whole world
     for country in data["Country/Region"]:
         if region_name == "World":
-            region.append(country)
+            if country not in countries["United States"]:
+                region.append(country)
         elif country in countries[region_name]:
             region.append(country)
 

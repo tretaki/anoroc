@@ -8,6 +8,8 @@ env/
 cases_confirmed.csv
 cases_death.csv
 cases_recovered.csv
+cases_confirmed_us.csv
+cases_death_us.csv
 
 # cache
 __pycache__/

@@ -23,7 +23,7 @@ parser.add_argument(
 parser.add_argument(
     "-r",
     "--region",
-    help="Input name of the region which you want to plot. You can choose from Africa, Asia, Europe, North America, Oceania, South America.",
+    help="Input name of the region which you want to plot. You can choose from Africa, Asia, Europe, North America, Oceania, South America, United States.",
 )
 
 parser.add_argument(
@@ -42,6 +42,10 @@ if args.update:
         os.remove(constants.FILE_DEATH)
     if os.path.exists(constants.FILE_RECOVERED):
         os.remove(constants.FILE_RECOVERED)
+    if os.path.exists(constants.FILE_CONFIRMED_US):
+        os.remove(constants.FILE_CONFIRMED_US)
+    if os.path.exists(constants.FILE_DEATH_US):
+        os.remove(constants.FILE_DEATH_US)
 
 # download csv if file doesn't exist
 if not os.path.exists(constants.FILE_CONFIRMED):
@@ -51,10 +55,22 @@ if not os.path.exists(constants.FILE_DEATH):
     wget.download(constants.URL_DEATH, out=constants.FILE_DEATH)
 if not os.path.exists(constants.FILE_RECOVERED):
     wget.download(constants.URL_RECOVERED, out=constants.FILE_RECOVERED)
+if not os.path.exists(constants.FILE_CONFIRMED_US):
+    wget.download(constants.URL_CONFIRMED_US, out=constants.FILE_CONFIRMED_US)
+if not os.path.exists(constants.FILE_DEATH_US):
+    wget.download(constants.URL_DEATH_US, out=constants.FILE_DEATH_US)
 
 # load the data from csv files
 data.confirmed, data.death, data.recovered = data.load(
     constants.FILE_CONFIRMED, constants.FILE_DEATH, constants.FILE_RECOVERED
+)
+
+data.confirmed_us, data.death_us = data.load_us(
+    constants.FILE_CONFIRMED_US, constants.FILE_DEATH_US
+)
+
+data.confirmed, data.death = data.merge_global_and_us_data(
+    data.confirmed, data.death, data.confirmed_us, data.death_us
 )
 
 

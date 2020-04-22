@@ -370,7 +370,11 @@ def plot_countries(countries, title=None):
 
     # calculate deaths per capita
     population = sum(extract.get_population(countries, region.countries).values())
-    death_per_capita = count_d[-1] / float(population) * 1e6
+
+    if population > 0:
+        death_per_capita = count_d[-1] / float(population) * 1e6
+    else:
+        death_per_capita = 0
 
     # make death rate label and per capita label
     death_rate_label = Label(
@@ -610,7 +614,7 @@ def plot_per_capita(countries_all, title=None):
     # if there is no country returned reduce the cases limit to 20
     if not countries_all_d:
         countries_all_d = region.max_countries_per_capita(
-            countries_all, data.death, number=5, limit=20
+            countries_all, data.death, number=5, limit=10
         )
 
     for country, color in zip(countries_all_d, colors):
