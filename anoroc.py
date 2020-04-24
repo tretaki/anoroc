@@ -5,8 +5,9 @@ import argparse
 import constants
 import plot
 import data
-import region
 import bokeh
+import region
+import extract
 
 
 prog_descrip = """Pull csv corona data from github repo. Plot country cases."""
@@ -100,7 +101,9 @@ if __name__ == "__main__":
         if region:
             figures = plot.make_all_plots_region(region, title=region_name)
     elif args.update:
-        print("\n\nFresh data downloaded.")
+        count, dates = extract.get_countries(["Italy"], data.confirmed)
+        last_data_point = dates[-1]
+        print("\n\nFresh data downloaded. Contains data up to %s." % last_data_point)
     else:
         print("\nNo country selected. Plotting data for whole world.")
         world, _ = region.get("World", region.countries, data.confirmed)
